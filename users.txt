@@ -1,0 +1,4 @@
+admin|admin|ADMIN
+lib|lib|LIBRARIAN
+std|std|STUDENT
+u2410019|1234|STUDENT
