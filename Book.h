@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+using namespace std;
 
 // ========================= DATE UTILITIES =========================
 
@@ -56,40 +57,40 @@ inline Date addDays(const Date &start, int add) {
 }
 
 inline void printDate(const Date &d) {
-    std::cout << std::setfill('0')
-              << std::setw(2) << d.day << "/"
-              << std::setw(2) << d.month << "/"
-              << std::setw(4) << d.year << std::setfill(' ');
+    cout << setfill('0')
+         << setw(2) << d.day << "/"
+         << setw(2) << d.month << "/"
+         << setw(4) << d.year << setfill(' ');
 }
 
-inline void inputDate(Date &d, const std::string &prompt) {
-    std::cout << prompt;
-    std::cin >> d.day >> d.month >> d.year;
-    while (std::cin.fail() || d.day <= 0 || d.month <= 0 || d.month > 12 || d.year <= 0) {
-        std::cin.clear();
-        std::cin.ignore(10000, '\n');
-        std::cout << "Invalid date, try again (dd mm yyyy): ";
-        std::cin >> d.day >> d.month >> d.year;
+inline void inputDate(Date &d, const string &prompt) {
+    cout << prompt;
+    cin >> d.day >> d.month >> d.year;
+    while (cin.fail() || d.day <= 0 || d.month <= 0 || d.month > 12 || d.year <= 0) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        cout << "Invalid date, try again (dd mm yyyy): ";
+        cin >> d.day >> d.month >> d.year;
     }
 }
 
 // ========================= WAITING QUEUE =========================
 
 struct WaitNode {
-    std::string studentId;
+    string studentId;
     WaitNode *next;
-    WaitNode(const std::string &id) : studentId(id), next(NULL) {}
+    WaitNode(const string &id) : studentId(id), next(NULL) {}
 };
 
 // ========================= ISSUED RECORD =========================
 
 struct IssuedRecord {
-    std::string studentId;
+    string studentId;
     Date issueDate;
     Date dueDate;
     IssuedRecord *next;
 
-    IssuedRecord(const std::string &sid, const Date &iss, const Date &due)
+    IssuedRecord(const string &sid, const Date &iss, const Date &due)
             : studentId(sid), issueDate(iss), dueDate(due), next(NULL) {}
 };
 
@@ -97,8 +98,8 @@ struct IssuedRecord {
 
 struct BookNode {
     int id;
-    std::string title;
-    std::string author;
+    string title;
+    string author;
     int totalCopies;
     int availableCopies;
 
@@ -109,14 +110,14 @@ struct BookNode {
 
     BookNode *next;
 
-    BookNode(int _id, const std::string &_title, const std::string &_author,
+    BookNode(int _id, const string &_title, const string &_author,
              int total, int avail)
             : id(_id), title(_title), author(_author),
               totalCopies(total), availableCopies(avail),
               waitFront(NULL), waitRear(NULL),
               issuedHead(NULL), next(NULL) {}
 
-    bool isStudentInQueue(const std::string &studentId) const {
+    bool isStudentInQueue(const string &studentId) const {
         WaitNode *cur = waitFront;
         while (cur != NULL) {
             if (cur->studentId == studentId) return true;
@@ -125,7 +126,7 @@ struct BookNode {
         return false;
     }
 
-    void enqueueWait(const std::string &studentId) {
+    void enqueueWait(const string &studentId) {
         WaitNode *node = new WaitNode(studentId);
         if (waitRear == NULL) {
             waitFront = waitRear = node;
@@ -135,7 +136,7 @@ struct BookNode {
         }
     }
 
-    bool dequeueWait(std::string &studentIdOut) {
+    bool dequeueWait(string &studentIdOut) {
         if (waitFront == NULL) return false;
         WaitNode *node = waitFront;
         studentIdOut = node->studentId;
@@ -155,7 +156,7 @@ struct BookNode {
         return c;
     }
 
-    IssuedRecord* findIssued(const std::string &studentId) {
+    IssuedRecord* findIssued(const string &studentId) {
         IssuedRecord *cur = issuedHead;
         while (cur != NULL) {
             if (cur->studentId == studentId) return cur;
@@ -164,7 +165,7 @@ struct BookNode {
         return NULL;
     }
 
-    bool removeIssued(const std::string &studentId, IssuedRecord* &removed) {
+    bool removeIssued(const string &studentId, IssuedRecord* &removed) {
         removed = NULL;
         IssuedRecord *cur = issuedHead;
         IssuedRecord *prev = NULL;
@@ -181,50 +182,50 @@ struct BookNode {
         return false;
     }
 
-    void addIssued(const std::string &studentId, const Date &issueD, const Date &dueD) {
+    void addIssued(const string &studentId, const Date &issueD, const Date &dueD) {
         IssuedRecord *rec = new IssuedRecord(studentId, issueD, dueD);
         rec->next = issuedHead;
         issuedHead = rec;
     }
 
     void printBrief() const {
-        std::cout << "ID: " << id
-                  << " | Title: " << title
-                  << " | Author: " << author
-                  << " | Total: " << totalCopies
-                  << " | Available: " << availableCopies;
+        cout << "ID: " << id
+             << " | Title: " << title
+             << " | Author: " << author
+             << " | Total: " << totalCopies
+             << " | Available: " << availableCopies;
         int wc = waitingCount();
         if (wc > 0) {
-            std::cout << " | Waiting: " << wc;
+            cout << " | Waiting: " << wc;
         }
-        std::cout << "\n";
+        cout << "\n";
     }
 
-    std::string toFileLine() const {
-        std::ostringstream oss;
+    string toFileLine() const {
+        ostringstream oss;
         oss << id << "|" << title << "|" << author
             << "|" << totalCopies << "|" << availableCopies;
         return oss.str();
     }
 
-    static BookNode* fromFileLine(const std::string &line) {
-        std::stringstream ss(line);
-        std::string part;
+    static BookNode* fromFileLine(const string &line) {
+        stringstream ss(line);
+        string part;
         int id, total, avail;
-        std::string title, author;
+        string title, author;
 
-        std::getline(ss, part, '|');
+        getline(ss, part, '|');
         if (part.empty()) return NULL;
-        id = std::atoi(part.c_str());
+        id = atoi(part.c_str());
 
-        std::getline(ss, title, '|');
-        std::getline(ss, author, '|');
+        getline(ss, title, '|');
+        getline(ss, author, '|');
 
-        std::getline(ss, part, '|');
-        total = std::atoi(part.c_str());
+        getline(ss, part, '|');
+        total = atoi(part.c_str());
 
-        std::getline(ss, part, '|');
-        avail = std::atoi(part.c_str());
+        getline(ss, part, '|');
+        avail = atoi(part.c_str());
 
         return new BookNode(id, title, author, total, avail);
     }

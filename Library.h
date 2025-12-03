@@ -4,15 +4,16 @@
 #include "Book.h"
 #include <fstream>
 #include <limits>
+using namespace std;
 
 class Library {
     BookNode *head;
-    std::string dbFile;
+    string dbFile;
     int loanDays;
     int finePerDay;
 
 public:
-    Library(const std::string &file = "books.txt")
+    Library(const string &file = "books.txt")
             : head(NULL), dbFile(file), loanDays(14), finePerDay(1000) {}
 
     ~Library() {
@@ -21,13 +22,13 @@ public:
 
     // ---------- FILE I/O ----------
     void loadFromFile() {
-        std::ifstream fin(dbFile.c_str());
+        ifstream fin(dbFile.c_str());
         if (!fin) {
-            std::cout << "No existing book database found, starting empty.\n";
+            cout << "No existing book database found, starting empty.\n";
             return;
         }
-        std::string line;
-        while (std::getline(fin, line)) {
+        string line;
+        while (getline(fin, line)) {
             if (line.empty()) continue;
             BookNode *node = BookNode::fromFileLine(line);
             if (node) insertSorted(node);
@@ -36,7 +37,7 @@ public:
     }
 
     void saveToFile() {
-        std::ofstream fout(dbFile.c_str());
+        ofstream fout(dbFile.c_str());
         BookNode *cur = head;
         while (cur != NULL) {
             fout << cur->toFileLine() << "\n";
@@ -80,7 +81,7 @@ public:
             head = head->next;
             tmp->next = NULL;
             freeBookList(tmp);
-            std::cout << "Book deleted.\n";
+            cout << "Book deleted.\n";
             return;
         }
         BookNode *cur = head;
@@ -90,159 +91,159 @@ public:
             cur = cur->next;
         }
         if (cur == NULL) {
-            std::cout << "Book not found.\n";
+            cout << "Book not found.\n";
             return;
         }
         prev->next = cur->next;
         cur->next = NULL;
         freeBookList(cur);
-        std::cout << "Book deleted.\n";
+        cout << "Book deleted.\n";
     }
 
     // ---------- CORE FEATURES ----------
     void addBookInteractive() {
         int id, total;
-        std::string title, author;
+        string title, author;
 
-        std::cout << "Enter Book ID (integer): ";
-        std::cin >> id;
-        if (std::cin.fail()) {
-            std::cin.clear();
-            std::cin.ignore(10000, '\n');
-            std::cout << "Invalid ID.\n";
+        cout << "Enter Book ID (integer): ";
+        cin >> id;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "Invalid ID.\n";
             return;
         }
         if (existsId(id)) {
-            std::cout << "Book with this ID already exists.\n";
+            cout << "Book with this ID already exists.\n";
             return;
         }
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-        std::cout << "Enter title: ";
-        std::getline(std::cin, title);
-        std::cout << "Enter author: ";
-        std::getline(std::cin, author);
+        cout << "Enter title: ";
+        getline(cin, title);
+        cout << "Enter author: ";
+        getline(cin, author);
 
-        std::cout << "Total copies: ";
-        std::cin >> total;
+        cout << "Total copies: ";
+        cin >> total;
         if (total <= 0) {
-            std::cout << "Total copies must be positive.\n";
+            cout << "Total copies must be positive.\n";
             return;
         }
         int available = total;
 
         BookNode *node = new BookNode(id, title, author, total, available);
         insertSorted(node);
-        std::cout << "Book added successfully.\n";
+        cout << "Book added successfully.\n";
     }
 
     void searchMenu() const {
         if (head == NULL) {
-            std::cout << "No books in library.\n";
+            cout << "No books in library.\n";
             return;
         }
         int choice;
-        std::cout << "\nSearch by:\n";
-        std::cout << "1. Book ID\n";
-        std::cout << "2. Title\n";
-        std::cout << "3. Author\n";
-        std::cout << "Choice: ";
-        std::cin >> choice;
+        cout << "\nSearch by:\n";
+        cout << "1. Book ID\n";
+        cout << "2. Title\n";
+        cout << "3. Author\n";
+        cout << "Choice: ";
+        cin >> choice;
 
         if (choice == 1) {
             int id;
-            std::cout << "Enter ID: ";
-            std::cin >> id;
+            cout << "Enter ID: ";
+            cin >> id;
             BookNode *b = findById(id);
-            if (b == NULL) std::cout << "Book not found.\n";
+            if (b == NULL) cout << "Book not found.\n";
             else printBookDetails(b);
         } else if (choice == 2) {
-            std::string q;
-            std::cout << "Enter title keyword: ";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::getline(std::cin, q);
+            string q;
+            cout << "Enter title keyword: ";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            getline(cin, q);
             searchByTitle(q);
         } else if (choice == 3) {
-            std::string q;
-            std::cout << "Enter author keyword: ";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::getline(std::cin, q);
+            string q;
+            cout << "Enter author keyword: ";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            getline(cin, q);
             searchByAuthor(q);
         } else {
-            std::cout << "Invalid choice.\n";
+            cout << "Invalid choice.\n";
         }
     }
 
-    void searchByTitle(const std::string &q) const {
+    void searchByTitle(const string &q) const {
         BookNode *cur = head;
         bool found = false;
         while (cur != NULL) {
-            if (cur->title.find(q) != std::string::npos) {
+            if (cur->title.find(q) != string::npos) {
                 printBookDetails(cur);
                 found = true;
             }
             cur = cur->next;
         }
-        if (!found) std::cout << "No books with given title.\n";
+        if (!found) cout << "No books with given title.\n";
     }
 
-    void searchByAuthor(const std::string &q) const {
+    void searchByAuthor(const string &q) const {
         BookNode *cur = head;
         bool found = false;
         while (cur != NULL) {
-            if (cur->author.find(q) != std::string::npos) {
+            if (cur->author.find(q) != string::npos) {
                 printBookDetails(cur);
                 found = true;
             }
             cur = cur->next;
         }
-        if (!found) std::cout << "No books with given author.\n";
+        if (!found) cout << "No books with given author.\n";
     }
 
     void printBookDetails(BookNode *b) const {
-        std::cout << "-----------------------------\n";
-        std::cout << "Book ID: " << b->id << "\n";
-        std::cout << "Title: " << b->title << "\n";
-        std::cout << "Author: " << b->author << "\n";
-        std::cout << "Total copies: " << b->totalCopies << "\n";
-        std::cout << "Available copies: " << b->availableCopies << "\n";
-        std::cout << "In waiting queue: " << b->waitingCount() << "\n";
+        cout << "-----------------------------\n";
+        cout << "Book ID: " << b->id << "\n";
+        cout << "Title: " << b->title << "\n";
+        cout << "Author: " << b->author << "\n";
+        cout << "Total copies: " << b->totalCopies << "\n";
+        cout << "Available copies: " << b->availableCopies << "\n";
+        cout << "In waiting queue: " << b->waitingCount() << "\n";
         int cnt = 0;
         IssuedRecord *ir = b->issuedHead;
         while (ir != NULL) {
             ++cnt;
             ir = ir->next;
         }
-        std::cout << "Currently issued: " << cnt << "\n";
-        std::cout << "-----------------------------\n";
+        cout << "Currently issued: " << cnt << "\n";
+        cout << "-----------------------------\n";
     }
 
     void displayAll() const {
         if (head == NULL) {
-            std::cout << "No books in library.\n";
+            cout << "No books in library.\n";
             return;
         }
-        std::cout << "\n======= All Books =======\n";
+        cout << "\n======= All Books =======\n";
         BookNode *cur = head;
         while (cur != NULL) {
             cur->printBrief();
             cur = cur->next;
         }
-        std::cout << "=========================\n";
+        cout << "=========================\n";
     }
 
-    void issueBook(const std::string &studentId) {
+    void issueBook(const string &studentId) {
         int id;
-        std::cout << "Enter Book ID to issue: ";
-        std::cin >> id;
+        cout << "Enter Book ID to issue: ";
+        cin >> id;
         BookNode *b = findById(id);
         if (b == NULL) {
-            std::cout << "Book not found.\n";
+            cout << "Book not found.\n";
             return;
         }
 
         if (b->findIssued(studentId) != NULL) {
-            std::cout << "You already have this book issued.\n";
+            cout << "You already have this book issued.\n";
             return;
         }
 
@@ -253,41 +254,41 @@ public:
             b->addIssued(studentId, issueDate, due);
             b->availableCopies--;
 
-            std::cout << "Book issued successfully.\n";
-            std::cout << "Due date: ";
+            cout << "Book issued successfully.\n";
+            cout << "Due date: ";
             printDate(due);
-            std::cout << "\n";
+            cout << "\n";
         } else {
             if (b->isStudentInQueue(studentId)) {
-                std::cout << "You are already in the waiting queue.\n";
+                cout << "You are already in the waiting queue.\n";
                 return;
             }
             b->enqueueWait(studentId);
             int pos = b->waitingCount();
-            std::cout << "No copies available now. You are added to waiting list.\n";
-            std::cout << "Your position in queue: " << pos << "\n";
+            cout << "No copies available now. You are added to waiting list.\n";
+            cout << "Your position in queue: " << pos << "\n";
         }
     }
 
-    void returnBook(const std::string &studentIdOpt = "") {
+    void returnBook(const string &studentIdOpt = "") {
         int id;
-        std::cout << "Enter Book ID to return: ";
-        std::cin >> id;
+        cout << "Enter Book ID to return: ";
+        cin >> id;
         BookNode *b = findById(id);
         if (b == NULL) {
-            std::cout << "Book not found.\n";
+            cout << "Book not found.\n";
             return;
         }
 
-        std::string studentId = studentIdOpt;
+        string studentId = studentIdOpt;
         if (studentId.empty()) {
-            std::cout << "Enter Student ID who is returning: ";
-            std::cin >> studentId;
+            cout << "Enter Student ID who is returning: ";
+            cin >> studentId;
         }
 
         IssuedRecord *rec = NULL;
         if (!b->removeIssued(studentId, rec)) {
-            std::cout << "This student does not have this book.\n";
+            cout << "This student does not have this book.\n";
             return;
         }
 
@@ -297,28 +298,28 @@ public:
         int delay = daysBetween(rec->dueDate, returnDate);
         if (delay > 0) {
             int fine = delay * finePerDay;
-            std::cout << "Book is returned late.\n";
-            std::cout << "Due date was: ";
+            cout << "Book is returned late.\n";
+            cout << "Due date was: ";
             printDate(rec->dueDate);
-            std::cout << "\nReturned on: ";
+            cout << "\nReturned on: ";
             printDate(returnDate);
-            std::cout << "\nDays late: " << delay
-                      << " | Fine: " << fine << " units.\n";
+            cout << "\nDays late: " << delay
+                 << " | Fine: " << fine << " units.\n";
         } else {
-            std::cout << "Book returned on time. No fine.\n";
+            cout << "Book returned on time. No fine.\n";
         }
         delete rec;
 
-        std::string nextStudent;
+        string nextStudent;
         if (b->dequeueWait(nextStudent)) {
-            std::cout << "Next student in queue is: " << nextStudent << "\n";
+            cout << "Next student in queue is: " << nextStudent << "\n";
             Date issueDate = returnDate;
             Date due = addDays(issueDate, loanDays);
             b->addIssued(nextStudent, issueDate, due);
-            std::cout << "Book automatically issued to " << nextStudent << ".\n";
-            std::cout << "New due date: ";
+            cout << "Book automatically issued to " << nextStudent << ".\n";
+            cout << "New due date: ";
             printDate(due);
-            std::cout << "\n";
+            cout << "\n";
         } else {
             b->availableCopies++;
         }
@@ -326,8 +327,8 @@ public:
 
     void deleteBookInteractive() {
         int id;
-        std::cout << "Enter Book ID to delete: ";
-        std::cin >> id;
+        cout << "Enter Book ID to delete: ";
+        cin >> id;
         deleteBookById(id);
     }
 };
